@@ -1,0 +1,8 @@
+{
+  "engine": "cocos-creator-js",
+  "packages": "packages",
+  "name": "colyseus-agario",
+  "id": "75c7c103-04ad-49dc-9162-f6c5e3787999",
+  "version": "2.4.2",
+  "isNew": false
+}
