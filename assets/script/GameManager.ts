@@ -2,6 +2,7 @@ import { Room, Client } from "colyseus.js"
 import Constants from "./common/Constants"
 import {State} from "../../multiplayer/server/rooms/State"
 import { setegid } from "process";
+import GameHelper from "./common/GameHelper";
 
 const {ccclass, property} = cc._decorator;
 export const lerp = (a: number, b: number, t: number) => (b - a) * t + a
@@ -22,7 +23,7 @@ export default class GameManager extends cc.Component
     private room: Room<State> = null
     private entities: { [id: string]: cc.Node } = {}
     private currentPlayerEntity: cc.Node
-    private _interpolation: boolean = !true
+    private _interpolation: boolean = true
 
     async onLoad()
     {
@@ -35,9 +36,11 @@ export default class GameManager extends cc.Component
         this.client = new Client(Constants.END_POINT)
         this.room = await this.client.joinOrCreate<State>("arena")
         this.room.state.entities.onAdd = (entity, sessionId: string) => {
-            const color = (entity.radius < 10) ? 0xff0000 : 0xFFFF0B;
+            const color = new cc.Color(GameHelper.getRndInteger(0, 256), GameHelper.getRndInteger(0, 256), GameHelper.getRndInteger(0, 256))
             let playerNode: cc.Node = cc.instantiate(this.playerPreb)
             playerNode.setParent(this.playerParentNode)
+            playerNode.setPosition(entity.x, entity.y)
+            playerNode.color = color
             this.entities[sessionId] = playerNode
 
             if(sessionId === this.room.sessionId)
@@ -46,8 +49,6 @@ export default class GameManager extends cc.Component
             }
 
             entity.onChange = (changes) => {
-                const color = (entity.radius < 10) ? 0xff0000 : 0xFFFF0B;
-
                 const playerNode = this.entities[sessionId];
 
                 // set x/y directly if interpolation is turned off
@@ -101,7 +102,9 @@ export default class GameManager extends cc.Component
 
     private onTouchMove(event: cc.Event.EventTouch)
     {
-
+        let touchLoc = event.touch.getLocation();
+        let newPos = this.node.convertToNodeSpaceAR(touchLoc)
+        this.room.send('mouse', { x: newPos.x, y: newPos.y });
     }
 
     private onTouchEnd(event: cc.Event.EventTouch)

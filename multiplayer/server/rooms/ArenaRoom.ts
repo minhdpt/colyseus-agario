@@ -15,17 +15,8 @@ export class ArenaRoom extends Room<State> {
 
     this.onMessage("mouse", (client, message: MouseMessage) => {
       const entity = this.state.entities[client.sessionId];
-
-      // skip dead players
-      if (!entity) {
-        console.log("DEAD PLAYER ACTING...");
-        return;
-      }
-
-      // change angle
-      const dst = Entity.distance(entity, message as Entity);
-      entity.speed = (dst < 20) ? 0 : Math.min(dst / 15, 4);
-      entity.angle = Math.atan2(entity.y - message.y, entity.x - message.x);
+      entity.x = message.x
+      entity.y = message.y
     });
 
     this.setSimulationInterval(() => this.state.update());
